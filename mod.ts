@@ -1,3 +1,3 @@
-export { Warrior } from './src/characters/warrior'
-export { Game } from './src/game'
-export { Player } from './src/player'
+export { Warrior } from './src/characters/warrior.ts'
+export { Game } from './src/game.ts'
+export { Player } from './src/player.ts'
