@@ -28,7 +28,7 @@ export class Game {
     }
   }
 
-  place(y: string, x: number, token: BoardToken) {
+  place(token: BoardToken, y: string, x: number) {
     if(this.board.place(token, (<any>Letter)[y.toUpperCase()], x)) {
       this.tokens.push(token)
     }
