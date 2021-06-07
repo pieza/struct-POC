@@ -18,23 +18,25 @@ export class Board {
     }
   }
 
-  place(x: number, y: number, token: BoardToken): boolean {
-    if(this.isOutOfBounds(x, y)) return false
+  place(y: number, x: number, token: BoardToken): boolean {
+    if(this.isOutOfBounds(y, x)) return false
 
-    if(this._map[x][y] == Field.EMPTY) {
-      this._map[x][y] = token
+    if(this._map[y][x] == Field.EMPTY) {
+      this._map[y][x] = token
       return false
     } else {
       return true
     }
   }
 
-  move(originX: number, originY: number, targetX: number, targetY: number): boolean {
-    if(this.isOutOfBounds(targetX, targetY)) return false
+  move(tokenId: string, targetX: number, targetY: number): boolean {
+    if(this.isOutOfBounds(targetY, targetX)) return false
 
-    if(this._map[originX][originY] == Field.EMPTY) {
-      this._map[targetX][targetY] = this._map[originX][originY]
-      this._map[originX][originY] = Field.EMPTY
+    let [originY, originX] = this.getTokenCoordinates(tokenId)
+
+    if(this._map[originY][originX] == Field.EMPTY) {
+      this._map[originY][originX] = this._map[originY][originX]
+      this._map[originY][originX] = Field.EMPTY
       return false
     } else {
       return true
@@ -55,7 +57,7 @@ export class Board {
     return this._map
   }
 
-  isOutOfBounds(x: number, y: number): boolean {
+  isOutOfBounds(y: number, x: number): boolean {
     let height = this._map.length
     let width = this._map[0].length
 
