@@ -28,15 +28,16 @@ export class Game {
     }
   }
 
-  place(token: BoardToken, y: string, x: number) {
-    if(this.board.place(token, (<any>Letter)[y.toUpperCase()], x)) {
+  place(token: BoardToken, x: string, y: number): boolean {
+    token.id = token.token
+    if(this.board.place(token, y, (<any>Letter)[x.toUpperCase()])) {
       this.tokens.push(token)
+      return true
     }
+    return false
   }
 
-  move(tokenId: string, y: string, x: number) {
-    if(this.board.move(tokenId, (<any>Letter)[y.toUpperCase()], x)) {
-      
-    }
+  move(tokenId: string, x: string, y: number): boolean {
+    return this.board.move(tokenId, y, (<any>Letter)[x.toUpperCase()])
   }
 }
