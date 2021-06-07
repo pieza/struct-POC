@@ -18,7 +18,7 @@ export class Board {
     }
   }
 
-  place(y: number, x: number, token: BoardToken): boolean {
+  place(token: BoardToken, y: number, x: number): boolean {
     if(this.isOutOfBounds(y, x)) return false
 
     if(this._map[y][x] == Field.EMPTY) {

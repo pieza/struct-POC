@@ -29,13 +29,13 @@ export class Game {
   }
 
   place(y: string, x: number, token: BoardToken) {
-    if(this.board.place((<any>Letter)[y.toUpperCase()], x, token)) {
+    if(this.board.place(token, (<any>Letter)[y.toUpperCase()], x)) {
       this.tokens.push(token)
     }
   }
 
   move(tokenId: string, y: string, x: number) {
-    if(this.board.move((<any>Letter)[y.toUpperCase()], x, tokenId)) {
+    if(this.board.move(tokenId, (<any>Letter)[y.toUpperCase()], x)) {
       
     }
   }
