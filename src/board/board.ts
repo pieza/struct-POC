@@ -44,7 +44,7 @@ export class Board {
   getTokenCoordinates(tokenId: string): Array<number> {
     for (let i = 0; i < this._map.length; i++) {
       for (let j = 0; j < this._map[i].length; j++) {
-        if(this._map[i][j] instanceof BoardToken 
+        if(this._map[i][j].token 
             && this._map[i][j].token == tokenId) return [i, j]     
       }
     }
