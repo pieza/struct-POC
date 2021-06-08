@@ -1,6 +1,6 @@
 export class OutOfBoundsError extends Error {
 
-  constructor(x: any, y: any) {
+  constructor(y: number, x: number) {
     super(`Coordinates [${x}, ${y}] are out of bounds.`)
     // Set the prototype explicitly.
     Object.setPrototypeOf(this, OutOfBoundsError.prototype);

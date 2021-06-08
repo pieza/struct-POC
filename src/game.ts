@@ -4,14 +4,14 @@ import { Letter } from "./enums/letter.ts";
 import { Player } from "./player.ts";
 
 export class Game {
-  board: Board
-  players: Array<Player>
-  turn: number
+  private _board: Board
+  private _players: Array<Player>
   tokens: Array<BoardToken>
+  turn: number
 
-  constructor(players: Array<Player>) {
-    this.board = new Board()
-    this.players = players
+  constructor() {
+    this._board = new Board()
+    this._players = []
     this.turn = 0
     this.tokens = []
   }
@@ -20,8 +20,14 @@ export class Game {
 
   }
 
+  addPlayer(player: Player) {
+    const p = this._players.find(p => p.id == player.id)
+    if(p) return 
+    this._players.push(player)
+  }
+
   nextTurn() {
-    if(this.turn == this.players.length - 1) {
+    if(this.turn == this._players.length - 1) {
       this.turn = 0
     } else {
       this.turn++
@@ -29,15 +35,23 @@ export class Game {
   }
 
   place(token: BoardToken, x: string, y: number): boolean {
-    token.id = token.token
-    if(this.board.place(token, y, (<any>Letter)[x.toUpperCase()])) {
+    if(this._board.place(token, y, (<any>Letter)[x.toUpperCase()])) {
       this.tokens.push(token)
+      this._board.showAvailableMovements(token.id)
       return true
     }
     return false
   }
 
   move(tokenId: string, x: string, y: number): boolean {
-    return this.board.move(tokenId, y, (<any>Letter)[x.toUpperCase()])
+    if(this._board.move(tokenId, y, (<any>Letter)[x.toUpperCase()], true)) {
+      this._board.clearEmptyTokens()
+      return true
+    }
+    return false
+  }
+
+  get map() {
+    return this._board.map
   }
 }
