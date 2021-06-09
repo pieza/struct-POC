@@ -4,19 +4,20 @@ import { Letter } from "./enums/letter.ts";
 import { Player } from "./player.ts";
 
 export class Game {
-  private _board: Board
-  private _players: Array<Player>
-  tokens: Array<BoardToken>
-  turn: number
-
-  constructor() {
-    this._board = new Board()
-    this._players = []
-    this.turn = 0
-    this.tokens = []
-  }
+  private _board: Board = new Board()
+  private _players: Array<Player> = []
+  tokens: Array<BoardToken> = []
+  turn: number = 0
+  player: any = null
+  movementsLeft: number = 0
+  manaLeft: number = 0
 
   start() {
+    this.placeTokens()
+    // TODO: validate if the game can start
+  }
+
+  placeTokens() {
 
   }
 
@@ -27,17 +28,16 @@ export class Game {
   }
 
   nextTurn() {
-    if(this.turn == this._players.length - 1) {
-      this.turn = 0
-    } else {
-      this.turn++
-    }
+    let token = this.tokens.shift()
+    this.turn++
+    this.movementsLeft = token?.movement || 0
+    this.player = token?.owner
   }
 
   place(token: BoardToken, x: string, y: number): boolean {
     if(this._board.place(token, y, (<any>Letter)[x.toUpperCase()])) {
       this.tokens.push(token)
-      this._board.showAvailableMovements(token.id)
+      this._board.showAvailableMovements(token.id, token.movement)
       return true
     }
     return false

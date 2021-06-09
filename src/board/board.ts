@@ -1,12 +1,17 @@
-import { InvalidActionError } from "../errors/invalid-position.ts"
 import { OutOfBoundsError } from "../errors/out-of-bounds.ts"
 import { TokenNotFoundError } from "../errors/token-not-found.ts"
+import { BoardField } from "./board-field.ts"
 import { BoardToken } from "./board-token.ts"
-import { EmptyToken } from "./empty-token.ts"
-import { Field } from "./field.ts"
 
+/**
+ * Representation of a game board table that handles the logic to place and move
+ * tokens over the board.
+ * 
+ * @author Jose Ulloa
+ */
 export class Board {
-  private _map : Array<Array<BoardToken>> = []
+
+  private _map : Array<Array<BoardField>> = []
 
   constructor(width: number = 10, height: number = 10) {
     this.generateMap(width, height)
@@ -17,15 +22,15 @@ export class Board {
     for (let i = 0; i < height; i++) {
       this._map.push([])
       for (let j = 0; j < width; j++) {
-        this._map[i].push(new EmptyToken());     
+        this._map[i].push(new BoardField());     
       }
     }
   }
 
   place(token: BoardToken, y: number, x: number): boolean {
     if(this.isOutOfBounds(y, x)) throw new OutOfBoundsError(y, x)
-    if(this._map[y][x].id == Field.EMPTY) {
-      this._map[y][x] = token
+    if(this._map[y][x].isEmpty) {
+      this._map[y][x].token = token
       return true
     }
     return false
@@ -38,49 +43,45 @@ export class Board {
 
     if(originY < 0 || originX < 0) throw new TokenNotFoundError(tokenId)
 
-    if(this._map[targetY][targetX].id == Field.EMPTY) {
-      let box = (this._map[targetY][targetX] as EmptyToken)
-      if(checkAvailable && !box.available) return false
-      this._map[targetY][targetX] = this._map[originY][originX]
-      this._map[originY][originX] = new EmptyToken()
+    if(this._map[targetY][targetX].isEmpty) {
+      if(checkAvailable && !this._map[targetY][targetX].isAvailable) return false
+      this._map[targetY][targetX].token = this._map[originY][originX].token
+      this._map[originY][originX].token = null
       return true
     }
 
     return false
   }
 
-  showAvailableMovements(tokenId: string) {
+  showAvailableMovements(tokenId: string, range: number) {
     let [tokenY, tokenX] = this.getTokenCoordinates(tokenId)
     let token = this.getTokenByCoordinates(tokenY, tokenX)
-    let movement = token.movement
 
-    for (let i = 0; i < movement; i++) {
-      for (let y = tokenY + 1 ; y <= tokenY + movement - i; y++) {
+    if(!token) throw new TokenNotFoundError(tokenId)
+
+    for (let i = 0; i < range; i++) {
+      for (let y = tokenY + 1 ; y <= tokenY + range - i; y++) {
         let x = tokenX + i
         if(this.isOutOfBounds(y, x)) break
-        let box = this._map[y][x]
-        if(box.id == Field.EMPTY) (box as EmptyToken).available = true
+        if(this._map[y][x].isEmpty) this._map[y][x].isAvailable = true
       }
 
-      for (let y = tokenY - 1; y >= tokenY - movement + i; y--) {
+      for (let y = tokenY - 1; y >= tokenY - range + i; y--) {
         let x = tokenX - i
         if(this.isOutOfBounds(y, x)) break
-        let box = this._map[y][x]
-        if(box.id == Field.EMPTY) (box as EmptyToken).available = true
+        if(this._map[y][x].isEmpty) this._map[y][x].isAvailable = true
       }
 
-      for (let x = tokenX + 1 ; x <= tokenX + movement - i; x++) {
+      for (let x = tokenX + 1 ; x <= tokenX + range - i; x++) {
         let y = tokenY - i
         if(this.isOutOfBounds(y, x)) break
-        let box = this._map[y][x]
-        if(box.id == Field.EMPTY) (box as EmptyToken).available = true
+        if(this._map[y][x].isEmpty) this._map[y][x].isAvailable = true
       }
 
-      for (let x = tokenX - 1 ; x >= tokenX - movement + i; x--) {
+      for (let x = tokenX - 1 ; x >= tokenX - range + i; x--) {
         let y = tokenY + i
         if(this.isOutOfBounds(y, x)) break
-        let box = this._map[y][x]
-        if(box.id == Field.EMPTY) (box as EmptyToken).available = true
+        if(this._map[y][x].isEmpty) this._map[y][x].isAvailable = true
       }
     }
   }
@@ -88,8 +89,8 @@ export class Board {
   clearEmptyTokens(): void {
     for (let i = 0; i < this._map.length; i++) {
       for (let j = 0; j < this._map[i].length; j++) {
-        if(this._map[i][j].id == Field.EMPTY) 
-          (this._map[i][j] as EmptyToken).available = false
+        if(this._map[i][j].isEmpty) 
+          this._map[i][j].isAvailable = false
       }
     }
   }
@@ -103,25 +104,25 @@ export class Board {
   getTokenCoordinates(tokenId: string): Array<number> {
     for (let i = 0; i < this._map.length; i++) {
       for (let j = 0; j < this._map[i].length; j++) {
-        if(this._map[i][j].id == tokenId) return [i, j]     
+        if(this._map[i][j].token?.id == tokenId) return [i, j]     
       }
     }
     return [-1, -1]
   }
 
-  getTokenById(tokenId: string): BoardToken {
+  getTokenById(tokenId: string): BoardToken | null {
     for (let i = 0; i < this._map.length; i++) {
       for (let j = 0; j < this._map[i].length; j++) {
-        if(this._map[i][j].id == tokenId) return this._map[i][j]    
+        if(this._map[i][j].token?.id == tokenId) return this._map[i][j].token   
       }
     }
 
     throw new TokenNotFoundError(tokenId)
   }
 
-  getTokenByCoordinates(y: number, x: number): BoardToken {
+  getTokenByCoordinates(y: number, x: number): BoardToken | null {
     if(this.isOutOfBounds(y, x)) throw new OutOfBoundsError(y, x)
-    return this._map[y][x]
+    return this._map[y][x].token
   }
 
   get map() {
